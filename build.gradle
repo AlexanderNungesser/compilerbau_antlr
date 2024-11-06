@@ -34,7 +34,7 @@ generateGrammarSource {
 
 application {
     // TODO: Define your main class here
-    mainClass = 'Main'
+    mainClass = 'MainTask03'
 }
 
 
