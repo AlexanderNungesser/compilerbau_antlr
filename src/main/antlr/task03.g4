@@ -1,6 +1,6 @@
 grammar task03;
 
-start : stmt* ;
+start : stmt* EOF ;
 
 stmt : assign
     | while
@@ -11,7 +11,8 @@ assign  : ID ':=' expr ;
 
 while: 'while' cond 'do' stmt* 'end' ;
 
-if: 'if' cond 'do' stmt* 'end' | 'if' cond 'do' stmt* 'else do' 'end' ;
+if: 'if' cond 'do' stmt* 'end'
+    | 'if' cond 'do' stmt* 'else do' stmt* 'end' ;
 
 cond : expr '==' expr
      |  expr '!=' expr
@@ -19,7 +20,7 @@ cond : expr '==' expr
      |  expr '<' expr
      ;
 
-expr : exprNUM | exprSTR | ID;
+expr : ID | exprNUM | exprSTR;
 
 exprNUM  : exprNUM '*' exprNUM
       | exprNUM '/' exprNUM
@@ -36,7 +37,6 @@ exprSTR  : exprSTR '+' exprSTR
 // Lexer
 ID    : [a-zA-Z_][a-zA-Z_0-9]* ;
 NUM   : [0-9]+ ;
-STR   :  '"' WRD* '"' ;
-WRD   : (~[\n\r"]) ;
-COMMENt : '#' WRD* -> skip ;
+STR  :  '"' (~[\n\r"])* '"' ;
+COMMENT :  '#' ~[\n\r]* -> skip ;
 WS    : [ \t\n\r]+ -> skip ;
