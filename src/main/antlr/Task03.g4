@@ -1,4 +1,4 @@
-grammar task03;
+grammar Task03;
 
 start : stmt* EOF ;
 
