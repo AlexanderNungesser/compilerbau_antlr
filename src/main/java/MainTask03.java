@@ -5,22 +5,30 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public class MainTask03 {
 
-    public static void main(String... args) throws IOException {
+  public static void main(String... args) throws IOException {
 
-        String input = "a := 10\n" +
-                "b := 0\n" +
-                "while a >= 0 do\n" +
-                "    a := a - 1\n" +
-                "    b := b + 9\n" +
-                "end";
+    String input =
+        "a     := 0\n"
+            + "    if    10 < 1\n"
+            + "       do\n"
+            + "a    :=     42      # Zuweisung des Wertes 42 an die Variable a\n"
+            + "else do\n"
+            + "        a :=      7\n"
+            + "  end";
 
-        Task03Lexer lexer = new Task03Lexer(CharStreams.fromString(input));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        Task03Parser parser = new Task03Parser(tokens);
+    Task03Lexer lexer = new Task03Lexer(CharStreams.fromString(input));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    Task03Parser parser = new Task03Parser(tokens);
 
-        System.out.println(input);
+    System.out.println("Input:\n" + input + "\n");
 
-        ParseTree tree = parser.start(); // Start-Regel
-        System.out.println(tree.toStringTree(parser));
-    }
+    ParseTree tree = parser.program(); // Start-Regel
+    System.out.println("ParseTree:\n" + tree.toStringTree(parser) + "\n");
+
+    MyTask03Visitor eval = new MyTask03Visitor();
+
+    String output = eval.visit(tree);
+
+    System.out.println("Output:\n" + output + "!");
+  }
 }
