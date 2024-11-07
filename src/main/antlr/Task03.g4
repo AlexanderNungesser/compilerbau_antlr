@@ -1,7 +1,7 @@
 grammar Task03;
 
 // Parser
-start   : stmt* EOF ;
+program   : stmt* EOF ;
 
 stmt    : assign
         | while
