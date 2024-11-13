@@ -11,4 +11,11 @@ import java.util.ArrayList;
         public void addChild(ASTNode child) {
             this.children.add(child);
         }
+
+        public void print() {
+            System.out.println(this.value);
+            for (Object child : this.children) {
+                ((ASTNode) child).print();
+            }
+        }
     }

@@ -36,6 +36,7 @@ public class MainTask04 {
 
         ASTNode ast = eval.visit(tree);
 
+
         System.out.println("Output:\n" + ast);
     }
 }
