@@ -65,7 +65,7 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
     }
     @Override
     public ASTNode visitReturn(MiniCParser.ReturnContext ctx) {
-        ASTNode current = new ASTNode(ctx.getText());
+        ASTNode current = new ASTNode("return");
         current.addChild(visit(ctx.expr())); // Rückgabewert
         return current;
     }
