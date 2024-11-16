@@ -25,4 +25,31 @@ public class Scope {
       return null;
     }
   }
+
+  public void print() {
+    print(0);
+  }
+
+  // Private Hilfsmethode mit Einrückung
+  private void print(int indentLevel) {
+    // Erzeuge Einrückungs-String
+    String indent = "  ".repeat(indentLevel);
+
+    // Gib die aktuelle Scope-Ebene aus
+    System.out.println(indent + "Scope {");
+
+    // Gib die Symbole im aktuellen Scope aus
+    for (Map.Entry<String, Symbol> entry : symbols.entrySet()) {
+      System.out.println(indent + "  " + entry.getKey() + ": " + entry.getValue());
+    }
+
+    // Wenn es ein enclosingScope gibt, rekursiv ausgeben
+    if (enclosingScope != null) {
+      System.out.println(indent + "  Enclosing Scope:");
+      enclosingScope.print(indentLevel + 1);
+    }
+
+    System.out.println(indent + "}");
+  }
+
 }

@@ -18,10 +18,12 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
   @Override
   public ASTNode visitVardecl(MiniCParser.VardeclContext ctx) {
     ASTNode node = new ASTNode("vardecl");
-    // TODO: int i; und int i = 0;
     node.addChild(visit(ctx.getChild(0)));
-    node.addChild(new ASTNode(ctx.getChild(1).getText()));
-    node.addChild(visit(ctx.getChild(3)));
+    node.addChild(new ASTNode(ctx.getChild(1).getText(), "ID"));
+
+    if (ctx.getChildCount() == 5) {
+      node.addChild(visit(ctx.getChild(3)));
+    }
     return node;
   }
 
@@ -33,15 +35,23 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
   @Override
   public ASTNode visitExpr(MiniCParser.ExprContext ctx) {
     if (ctx.getChildCount() == 1) {
-      return new ASTNode(ctx.getChild(0).getText());
-    } else {
-      ASTNode node = new ASTNode(ctx.getChild(1).getText());
-      if (ctx.getChild(0).getText().equals("(") && ctx.getChild(2).getText().equals(")")) {
-        return node;
+      if (ctx.getChild(0) == ctx.ID()) {
+        return new ASTNode(ctx.getChild(0).getText(), "ID");
+      }else if (ctx.getChild(0) == ctx.NUMBER()) {
+        return new ASTNode(ctx.getChild(0).getText(), "NUMBER");
+      }else if (ctx.getChild(0) == ctx.STRING()) {
+        return new ASTNode(ctx.getChild(0).getText(), "STRING");
+      }else {
+        return visit(ctx.getChild(0));
       }
+    } else {
+      if (ctx.getChild(0).getText().equals("(") && ctx.getChild(2).getText().equals(")")) {
+        return visit(ctx.getChild(1));
+      }
+      ASTNode node = new ASTNode(ctx.getChild(1).getText());
       ASTNode child1 = visit(ctx.getChild(0));
-      ASTNode child2 = visit(ctx.getChild(2));
       node.addChild(child1);
+      ASTNode child2 = visit(ctx.getChild(2));
       node.addChild(child2);
       return node;
     }
@@ -49,19 +59,15 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
 
   @Override
   public ASTNode visitFncall(MiniCParser.FncallContext ctx) {
-    ASTNode node = new ASTNode("fncall");
-    node.addChild(new ASTNode(ctx.getChild(0).getText()));
-    node.addChild(visit(ctx.getChild(2)));
+    ASTNode node = new ASTNode(ctx.ID().getText(), "ID");
+    node.addChildren(visit(ctx.getChild(2)).children);
     return node;
   }
 
   @Override
   public ASTNode visitArgs(MiniCParser.ArgsContext ctx) {
-    ASTNode node = new ASTNode("args");
-    for (int i = 0; i < ctx.getChildCount() - 1; i++) {
-      if (i % 2 != 0) {
-        continue;
-      }
+    ASTNode node = new ASTNode("");
+    for (int i = 0; i < ctx.getChildCount(); i+=2) {
       node.addChild(visit(ctx.getChild(i)));
     }
     return node;
@@ -77,26 +83,22 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
 
   @Override
   public ASTNode visitFndecl(MiniCParser.FndeclContext ctx) {
-    ASTNode node = new ASTNode("fndecl");
-    node.addChild(visit(ctx.getChild(0)));
-    node.addChild(new ASTNode(ctx.getChild(1).getText()));
-    node.addChild(visit(ctx.getChild(3)));
-    node.addChild(visit(ctx.getChild(5)));
+    ASTNode node = new ASTNode(ctx.ID().getText(), ctx.getChild(0).getText());
+    if (ctx.getChildCount() == 5) {
+      node.addChild(visit(ctx.getChild(4)));
+    }else{
+      node.addChild(visit(ctx.getChild(3)));
+      node.addChild(visit(ctx.getChild(5)));
+    }
     return node;
   }
 
   public ASTNode visitParams(MiniCParser.ParamsContext ctx) {
     ASTNode node = new ASTNode("params");
-    int id = 1;
-    for (int i = 0; i < ctx.getChildCount() - 2; i++) {
-      if (ctx.getChild(i + 1).getText().equals(",")) {
-        node.addChild(new ASTNode(ctx.getChild(i).getText()));
-        continue;
-      }
-      if (ctx.getChild(i).getText().equals(",")) {
-        continue;
-      }
-      node.addChild(visit(ctx.getChild(i)));
+    for (int i = 0; i < ctx.getChildCount(); i+=3) {
+      ASTNode child1 = visit(ctx.getChild(i));
+      ASTNode child2 = new ASTNode(ctx.getChild(i+1).getText(), child1.getValue());
+      node.addChild(child2);
     }
     return node;
   }
@@ -104,10 +106,7 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
   @Override
   public ASTNode visitBlock(MiniCParser.BlockContext ctx) {
     ASTNode node = new ASTNode("block");
-    for (int i = 0; i < ctx.getChildCount() - 1; i++) {
-      if (i == 0 || i == ctx.getChildCount() - 1) {
-        continue;
-      }
+    for (int i = 1; i < ctx.getChildCount() - 1; i++) {
       node.addChild(visit(ctx.getChild(i)));
     }
     return node;
