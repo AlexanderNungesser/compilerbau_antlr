@@ -1,4 +1,6 @@
 .gradle
+.idea
+build
 **/build/
 !src/**/build/
 
@@ -20,8 +22,3 @@ gradle-app.setting
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
 
-# Ignore Gradle build output directory
-build
-
-# Ignore IntelliJ settings
-.idea
