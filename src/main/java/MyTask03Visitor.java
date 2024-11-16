@@ -57,12 +57,12 @@ public class MyTask03Visitor extends Task03BaseVisitor<String> {
             .map(child -> ctx.children.indexOf(child))
             .findFirst();
     sb.append(indent())
-            .append(ctx.getChild(0))
-            .append(" ")
-            .append(visit(ctx.cond()))
-            .append(" ")
-            .append(ctx.getChild(2))
-            .append("\n");
+        .append(ctx.getChild(0))
+        .append(" ")
+        .append(visit(ctx.cond()))
+        .append(" ")
+        .append(ctx.getChild(2))
+        .append("\n");
     tabLevel++;
     if (elseIndex.isPresent()) {
       for (int i = 3; i < elseIndex.get(); i++) {
