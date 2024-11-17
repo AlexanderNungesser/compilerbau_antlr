@@ -64,7 +64,7 @@ public class ASTScopeVisitor extends ASTVisitor {
 
   public ASTNode visitVardecl(ASTNode node) {
     Symbol t = scope.resolve(node.children.get(0).getValue());
-    Symbol var = new Symbol(node.children.get(1).getValue(), t.name);
+    Symbol var = new Variable(node.children.get(1).getValue(), t.name);
     Symbol exists = scope.resolve(var.name);
     if (exists != null) {
       System.out.println("Error: such variable " + exists.name + " already exists");
@@ -93,9 +93,9 @@ public class ASTScopeVisitor extends ASTVisitor {
     if (func == null) {
       System.out.println("Error: no such function: " + name);
     }
-    //    if (func.type == variable){
-    //      System.out.println("Error: " + name + " is not a function");
-    //    }
+    if (func instanceof Variable) {
+      System.out.println("Error: " + name + " is not a function");
+    }
     visitChildren(node);
     return node;
   }
@@ -114,7 +114,7 @@ public class ASTScopeVisitor extends ASTVisitor {
   public ASTNode visitFndecl(ASTNode node) {
     String name = node.getValue();
     Symbol type = scope.resolve(node.getType());
-    Symbol func = new Symbol(name, type.name);
+    Symbol func = new Function(name, type.name);
     scope.bind(func);
     scope = new Scope(scope);
     scopeList.add(scope);
@@ -127,7 +127,7 @@ public class ASTScopeVisitor extends ASTVisitor {
     for (ASTNode child : node.children) {
       String name = child.getValue();
       Symbol type = scope.resolve(child.getType());
-      Symbol param = new Symbol(name, type.name);
+      Symbol param = new Variable(name, type.name);
       scope.bind(param);
     }
     return node;
