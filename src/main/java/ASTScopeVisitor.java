@@ -2,9 +2,48 @@ public class ASTScopeVisitor extends ASTVisitor {
 
   Scope scope;
 
+  public ASTNode visit(ASTNode node) {
+    switch (node.getValue()) {
+      case "program":
+        visitProgram(node);
+        break;
+      case "vardecl":
+        visitVardecl(node);
+        break;
+      case "fndecl":
+        visitFndecl(node.children.getFirst());
+        break;
+      case "fncall":
+        visitFncall(node.children.getFirst());
+        break;
+      case "while":
+        visitWhile(node);
+        break;
+      case "cond":
+        visitCond(node);
+        break;
+      case "block":
+        visitBlock(node);
+        break;
+      case "assign":
+        visitAssign(node);
+        break;
+      case "params":
+        visitParams(node);
+        break;
+      case "return":
+        visitReturn(node);
+        break;
+      default:
+        visitExpr(node);
+        break;
+    }
+    return node;
+  }
+
   public ASTNode visitChildren(ASTNode node) {
     for (ASTNode child : node.children) {
-      visitChildren(child);
+      visit(child);
     }
     return node;
   }
@@ -35,9 +74,11 @@ public class ASTScopeVisitor extends ASTVisitor {
     if (node.children.isEmpty() && node.getType().equals("ID")) {
       String name = node.getValue();
       Symbol var = scope.resolve(name);
-      if (var == null){
+      if (var == null) {
         System.out.println("Error: no such variable: " + name);
       }
+    } else {
+      visitChildren(node);
     }
     return node;
   }
@@ -45,22 +86,26 @@ public class ASTScopeVisitor extends ASTVisitor {
   public ASTNode visitFncall(ASTNode node) {
     String name = node.getValue();
     Symbol func = scope.resolve(name);
-    if (func == null){
+    if (func == null) {
       System.out.println("Error: no such function: " + name);
     }
-//    if (func.type == variable){
-//      System.out.println("Error: " + name + " is not a function");
-//    }
+    //    if (func.type == variable){
+    //      System.out.println("Error: " + name + " is not a function");
+    //    }
+    visitChildren(node);
     return node;
   }
 
-//  public ASTNode visitArgs(ASTNode node) {
-//    return node;
-//  }
+  //  public ASTNode visitArgs(ASTNode node) {
+  //    return node;
+  //  }
 
-//  public ASTNode visitAssign(ASTNode node) {
-//    return node;
-//  }
+  public ASTNode visitAssign(ASTNode node) {
+    for (ASTNode child : node.children) {
+      visitExpr(child);
+    }
+    return node;
+  }
 
   public ASTNode visitFndecl(ASTNode node) {
     String name = node.getValue();
@@ -69,6 +114,7 @@ public class ASTScopeVisitor extends ASTVisitor {
     scope.bind(func);
     scope = new Scope(scope);
     visitChildren(node);
+    scope = scope.enclosingScope;
     return node;
   }
 
@@ -89,15 +135,18 @@ public class ASTScopeVisitor extends ASTVisitor {
     return node;
   }
 
-//  public ASTNode visitWhile(ASTNode node) {
-//    return node;
-//  }
-//
-//  public ASTNode visitCond(ASTNode node) {
-//    return node;
-//  }
-//
-//  public ASTNode visitReturn(ASTNode node) {
-//    return node;
-//  }
+  public ASTNode visitWhile(ASTNode node) {
+    visitChildren(node);
+    return node;
+  }
+
+  public ASTNode visitCond(ASTNode node) {
+    visitChildren(node);
+    return node;
+  }
+
+  public ASTNode visitReturn(ASTNode node) {
+    visitChildren(node);
+    return node;
+  }
 }

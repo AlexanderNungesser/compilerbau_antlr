@@ -27,7 +27,7 @@ public class ASTNode {
     this.children.add(child);
   }
 
-  public void addChildren(ArrayList<ASTNode> children){
+  public void addChildren(ArrayList<ASTNode> children) {
     this.children.addAll(children);
   }
 

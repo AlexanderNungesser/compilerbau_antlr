@@ -51,5 +51,4 @@ public class Scope {
 
     System.out.println(indent + "}");
   }
-
 }

@@ -37,11 +37,11 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
     if (ctx.getChildCount() == 1) {
       if (ctx.getChild(0) == ctx.ID()) {
         return new ASTNode(ctx.getChild(0).getText(), "ID");
-      }else if (ctx.getChild(0) == ctx.NUMBER()) {
+      } else if (ctx.getChild(0) == ctx.NUMBER()) {
         return new ASTNode(ctx.getChild(0).getText(), "NUMBER");
-      }else if (ctx.getChild(0) == ctx.STRING()) {
+      } else if (ctx.getChild(0) == ctx.STRING()) {
         return new ASTNode(ctx.getChild(0).getText(), "STRING");
-      }else {
+      } else {
         return visit(ctx.getChild(0));
       }
     } else {
@@ -59,15 +59,17 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
 
   @Override
   public ASTNode visitFncall(MiniCParser.FncallContext ctx) {
+    ASTNode parent = new ASTNode("fncall");
     ASTNode node = new ASTNode(ctx.ID().getText(), "ID");
     node.addChildren(visit(ctx.getChild(2)).children);
-    return node;
+    parent.addChild(node);
+    return parent;
   }
 
   @Override
   public ASTNode visitArgs(MiniCParser.ArgsContext ctx) {
-    ASTNode node = new ASTNode("");
-    for (int i = 0; i < ctx.getChildCount(); i+=2) {
+    ASTNode node = new ASTNode("args");
+    for (int i = 0; i < ctx.getChildCount(); i += 2) {
       node.addChild(visit(ctx.getChild(i)));
     }
     return node;
@@ -76,28 +78,30 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
   @Override
   public ASTNode visitAssign(MiniCParser.AssignContext ctx) {
     ASTNode node = new ASTNode("assign");
-    node.addChild(new ASTNode(ctx.getChild(0).getText()));
+    node.addChild(new ASTNode(ctx.getChild(0).getText(), "ID"));
     node.addChild(visit(ctx.getChild(2)));
     return node;
   }
 
   @Override
   public ASTNode visitFndecl(MiniCParser.FndeclContext ctx) {
+    ASTNode parent = new ASTNode("fndecl");
     ASTNode node = new ASTNode(ctx.ID().getText(), ctx.getChild(0).getText());
     if (ctx.getChildCount() == 5) {
       node.addChild(visit(ctx.getChild(4)));
-    }else{
+    } else {
       node.addChild(visit(ctx.getChild(3)));
       node.addChild(visit(ctx.getChild(5)));
     }
-    return node;
+    parent.addChild(node);
+    return parent;
   }
 
   public ASTNode visitParams(MiniCParser.ParamsContext ctx) {
     ASTNode node = new ASTNode("params");
-    for (int i = 0; i < ctx.getChildCount(); i+=3) {
+    for (int i = 0; i < ctx.getChildCount(); i += 3) {
       ASTNode child1 = visit(ctx.getChild(i));
-      ASTNode child2 = new ASTNode(ctx.getChild(i+1).getText(), child1.getValue());
+      ASTNode child2 = new ASTNode(ctx.getChild(i + 1).getText(), child1.getValue());
       node.addChild(child2);
     }
     return node;
@@ -133,6 +137,8 @@ public class ASTVisitor extends MiniCBaseVisitor<ASTNode> {
 
   @Override
   public ASTNode visitReturn(MiniCParser.ReturnContext ctx) {
-    return visit(ctx.getChild(1));
+    ASTNode node = new ASTNode(ctx.getChild(0).getText());
+    node.addChild(visit(ctx.getChild(1)));
+    return node;
   }
 }
