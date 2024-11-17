@@ -48,6 +48,6 @@ public class MainTask04 {
     ASTScopeVisitor scope = new ASTScopeVisitor();
     ASTNode astScope = scope.visit(ast);
 
-    scope.scope.print();
+    scope.scopeList.forEach(Scope::print);
   }
 }

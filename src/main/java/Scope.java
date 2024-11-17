@@ -40,7 +40,7 @@ public class Scope {
 
     // Gib die Symbole im aktuellen Scope aus
     for (Map.Entry<String, Symbol> entry : symbols.entrySet()) {
-      System.out.println(indent + "  " + entry.getKey() + ": " + entry.getValue());
+      System.out.println(indent + "  " + entry.getKey() + ": " + entry.getValue().type);
     }
 
     // Wenn es ein enclosingScope gibt, rekursiv ausgeben

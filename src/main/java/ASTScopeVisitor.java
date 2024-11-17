@@ -1,6 +1,9 @@
+import java.util.ArrayList;
+
 public class ASTScopeVisitor extends ASTVisitor {
 
   Scope scope;
+  ArrayList<Scope> scopeList = new ArrayList<>();
 
   public ASTNode visit(ASTNode node) {
     switch (node.getValue()) {
@@ -50,6 +53,7 @@ public class ASTScopeVisitor extends ASTVisitor {
 
   public ASTNode visitProgram(ASTNode node) {
     Scope globals = new Scope();
+    scopeList.add(globals);
     globals.bind(new BuiltIn("int"));
     globals.bind(new BuiltIn("bool"));
     globals.bind(new BuiltIn("string"));
@@ -113,6 +117,7 @@ public class ASTScopeVisitor extends ASTVisitor {
     Symbol func = new Symbol(name, type.name);
     scope.bind(func);
     scope = new Scope(scope);
+    scopeList.add(scope);
     visitChildren(node);
     scope = scope.enclosingScope;
     return node;
@@ -130,6 +135,7 @@ public class ASTScopeVisitor extends ASTVisitor {
 
   public ASTNode visitBlock(ASTNode node) {
     scope = new Scope(scope);
+    scopeList.add(scope);
     visitChildren(node);
     scope = scope.enclosingScope;
     return node;
