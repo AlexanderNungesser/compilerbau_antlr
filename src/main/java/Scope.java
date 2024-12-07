@@ -4,12 +4,14 @@ import java.util.Map;
 public class Scope {
 
   public Scope enclosingScope;
+  public Scope innerScope;
   public Map<String, Symbol> symbols = new HashMap<String, Symbol>();
 
   public Scope() {}
 
   public Scope(Scope scope) {
     this.enclosingScope = scope;
+    this.innerScope = null;
   }
 
   public void bind(Symbol symbol) {

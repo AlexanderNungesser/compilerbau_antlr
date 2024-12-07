@@ -9,6 +9,7 @@ expr    :  literal
         |  symbol
         |  list
         |  def
+        |  if
         |  fn
         |  fcall
         |  let
@@ -30,6 +31,9 @@ fcall   :  '(' (ID | OP) expr* ')' ;
 
 let     :  '(' 'let' '(' binding* ')' expr ')' ;
 binding :  symbol expr ;
+
+if      : '(' 'if' expr block block? ')';
+block    : ('(' 'do' expr* ')') | expr ;
 
 
 // Lexer
