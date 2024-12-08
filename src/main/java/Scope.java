@@ -1,17 +1,17 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Scope {
 
   public Scope enclosingScope;
-  public Scope innerScope;
+  public ArrayList<Scope> innerScopes = new ArrayList<>();
   public Map<String, Symbol> symbols = new HashMap<String, Symbol>();
 
   public Scope() {}
 
   public Scope(Scope scope) {
     this.enclosingScope = scope;
-    this.innerScope = null;
   }
 
   public void bind(Symbol symbol) {
@@ -52,10 +52,10 @@ public class Scope {
               + entry.getValue().type);
     }
 
-    // Wenn es ein enclosingScope gibt, rekursiv ausgeben
-    if (enclosingScope != null) {
-      System.out.println(indent + "  Enclosing Scope:");
-      enclosingScope.print(indentLevel + 1);
+    // Gib alle inneren Scopes aus
+    for (Scope scope : innerScopes) {
+      System.out.println(indent + "  Inner Scope:");
+      scope.print(indentLevel + 1);
     }
 
     System.out.println(indent + "}");

@@ -1,7 +1,10 @@
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
   Scope scope;
+  Set<Scope> visitedScopes = new HashSet<Scope>();
 
   public Task05Interpreter(Scope scope) {
     super(scope);
@@ -34,8 +37,16 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
   }
 
   public Object evalID(Task05ASTNode node) {
-
-    return node.getValue();
+    Symbol symbol = scope.resolve(node.getValue());
+    if (symbol.type.equals(Task05ASTNode.Type.NUMBER.name())) {
+      return Double.parseDouble(symbol.value);
+    } else if (symbol.type.equals(Task05ASTNode.Type.BOOLEAN.name())) {
+      return Boolean.parseBoolean(symbol.value);
+    } else if (symbol.type.equals(Task05ASTNode.Type.STRING.name())) {
+      return symbol.value;
+    } else {
+      return evalList(node);
+    }
   }
 
   public ArrayList<Object> evalList(Task05ASTNode node) {
@@ -52,10 +63,7 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
   }
 
   public Object evalFn(Task05ASTNode node) {
-    this.scope = this.scope.innerScope;
-    evalChildren(node);
-    this.scope = this.scope.enclosingScope;
-    return node;
+    return evalScopes(node);
   }
 
   public Object evalFcall(Task05ASTNode node) {
@@ -70,7 +78,7 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
         case Task05ASTNode.Type.ID:
           switch (child.getValue()) {
             case "print":
-              return (String) eval(node.children.get(1));
+              return eval(node.children.get(1));
 
             case "str":
               String a = (String) eval(node.children.get(1));
@@ -104,8 +112,8 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
           String b = (String) eval(node.children.get(2));
           return a.concat(b);
         }
-        double a = (Double) eval(node.children.get(1));
-        double b = (Double) eval(node.children.get(2));
+        double a = Double.parseDouble((String) eval(node.children.get(1)));
+        double b = Double.parseDouble((String) eval(node.children.get(2)));
         return a + b;
 
       case "-":
@@ -152,10 +160,7 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
   }
 
   public Object evalLet(Task05ASTNode node) {
-    this.scope = this.scope.innerScope;
-    evalChildren(node);
-    this.scope = this.scope.enclosingScope;
-    return node;
+    return evalScopes(node);
   }
 
   public Object evalIf(Task05ASTNode node) {
@@ -164,9 +169,18 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
   }
 
   public Object evalBlock(Task05ASTNode node) {
-    this.scope = this.scope.innerScope;
-    evalChildren(node);
-    this.scope = this.scope.enclosingScope;
+    return evalScopes(node);
+  }
+
+  private Object evalScopes(Task05ASTNode node) {
+    for (Scope scope : this.scope.innerScopes) {
+      if (!visitedScopes.contains(scope)) {
+        this.scope = scope;
+        evalChildren(node);
+        this.scope = this.scope.enclosingScope;
+        visitedScopes.add(scope);
+      }
+    }
     return node;
   }
 }

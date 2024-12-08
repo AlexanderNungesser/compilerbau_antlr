@@ -5,9 +5,12 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public class MainTask05 {
   public static void main(String... args) throws IOException {
-
     String input =
-        "(+ \"abc\" \"def\")"
+        ";;     name   params  body\n"
+            + "(defn  hello  (n)     (str \"hello \" n))  ;; Definition einer Funktion \"hello\" mit einem Parameter\n"
+            + "\n"
+            + "(def n (hello \"world\"))                          ;; Aufruf der Funktion \"hello\" mit dem Argument \"world\""
+            + "(+ \"abc\" \"def\")"
             + "(nth (list 1 2 3) 2)"
             + "(list 1 2 3)          ;; (1 2 3)\n"
             + "\n"
@@ -52,15 +55,15 @@ public class MainTask05 {
     Task05ASTNode ast = eval.visit(tree);
     ast.print();
 
-    Task05ASTScopeVisitor scope = new Task05ASTScopeVisitor();
-    Task05ASTNode astScope = scope.visit(ast);
+    Task05ASTScopeVisitor scopeVisitor = new Task05ASTScopeVisitor();
+    Task05ASTNode astScope = scopeVisitor.visit(ast);
 
-    scope.scopeList.forEach(Scope::print);
+    scopeVisitor.scope.print();
 
-    Task05ASTTypeCheckVisitor typeChecker = new Task05ASTTypeCheckVisitor(scope.scope);
+    Task05ASTTypeCheckVisitor typeChecker = new Task05ASTTypeCheckVisitor(scopeVisitor.scope);
     typeChecker.visit(astScope);
 
-    Task05Interpreter interpreter = new Task05Interpreter(scope.scope);
+    Task05Interpreter interpreter = new Task05Interpreter(scopeVisitor.scope);
     interpreter.eval(astScope);
   }
 }

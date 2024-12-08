@@ -1,8 +1,11 @@
+import java.util.HashSet;
+import java.util.Set;
+
 public class Task05ASTTypeCheckVisitor extends Task05ASTScopeVisitor {
   Scope scope;
+  Set<Scope> visitedScopes = new HashSet<Scope>();
 
   public Task05ASTTypeCheckVisitor(Scope scope) {
-    super();
     this.scope = scope;
   }
 
@@ -21,7 +24,6 @@ public class Task05ASTTypeCheckVisitor extends Task05ASTScopeVisitor {
         visitFn(node);
         break;
       default:
-          if (this.scope == null){System.out.println("Value: " + node.getValue());}
         visitChildren(node);
         break;
     }
@@ -52,7 +54,7 @@ public class Task05ASTTypeCheckVisitor extends Task05ASTScopeVisitor {
         case "print":
           if (node.children.size() > 2) {
             System.out.println("Error: to much parameters");
-          } else if (isID(node.children.get(1)).equals(Task05ASTNode.Type.STRING.name())) {
+          } else if (!isID(node.children.get(1)).equals(Task05ASTNode.Type.STRING.name())) {
             System.out.println(
                 "Error: parameter must be of type " + Task05ASTNode.Type.STRING.name());
           } else {
@@ -107,23 +109,26 @@ public class Task05ASTTypeCheckVisitor extends Task05ASTScopeVisitor {
   }
 
   public Task05ASTNode visitFn(Task05ASTNode node) {
-    this.scope = this.scope.innerScope;
-    visitChildren(node);
-    this.scope = this.scope.enclosingScope;
-    return node;
+    return visitScopes(node);
   }
 
   public Task05ASTNode visitLet(Task05ASTNode node) {
-    this.scope = this.scope.innerScope;
-    visitChildren(node);
-    this.scope = this.scope.enclosingScope;
-    return node;
+    return visitScopes(node);
   }
 
   public Task05ASTNode visitBlock(Task05ASTNode node) {
-    this.scope = this.scope.innerScope;
-    visitChildren(node);
-    this.scope = this.scope.enclosingScope;
+    return visitScopes(node);
+  }
+
+  private Task05ASTNode visitScopes(Task05ASTNode node) {
+    for (Scope scope : this.scope.innerScopes) {
+      if (!visitedScopes.contains(scope)) {
+        this.scope = scope;
+        visitChildren(node);
+        this.scope = this.scope.enclosingScope;
+        visitedScopes.add(scope);
+      }
+    }
     return node;
   }
 }

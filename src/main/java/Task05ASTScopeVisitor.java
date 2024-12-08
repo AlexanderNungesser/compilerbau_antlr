@@ -1,9 +1,6 @@
-import java.util.ArrayList;
-
 public class Task05ASTScopeVisitor extends Task05ParseTreeVisitor {
 
   Scope scope;
-  ArrayList<Scope> scopeList = new ArrayList<>(); // for printing
 
   public Task05ASTNode visit(Task05ASTNode node) {
     switch (node.getType()) {
@@ -59,7 +56,6 @@ public class Task05ASTScopeVisitor extends Task05ParseTreeVisitor {
 
   public Task05ASTNode visitProgram(Task05ASTNode node) {
     Scope globals = new Scope();
-    scopeList.add(globals); // for printing
     globals.bind(new BuiltIn(Task05ASTNode.Type.NUMBER.name()));
     globals.bind(new BuiltIn(Task05ASTNode.Type.STRING.name()));
     globals.bind(new BuiltIn(Task05ASTNode.Type.BOOLEAN.name()));
@@ -84,7 +80,7 @@ public class Task05ASTScopeVisitor extends Task05ParseTreeVisitor {
   public Task05ASTNode visitID(Task05ASTNode node) {
     Symbol exists = scope.resolve(node.getValue());
     if (exists == null) {
-      Symbol var = new Variable(node.getValue(), null);
+      Symbol var = new Variable(node.getValue(), null, null);
       scope.bind(var);
     }
     return node;
@@ -96,8 +92,12 @@ public class Task05ASTScopeVisitor extends Task05ParseTreeVisitor {
   }
 
   public Task05ASTNode visitDef(Task05ASTNode node) {
+    if(node.children.get(1).getType() == Task05ASTNode.Type.FCALL){
+      return visitFcall(node.children.get(1));
+    }
     Symbol t = scope.resolve(node.children.get(1).getType().name());
-    Symbol var = new Variable(node.children.get(0).getValue(), t.name);
+    Symbol var =
+        new Variable(node.children.get(0).getValue(), t.name, node.children.get(1).getValue());
     Symbol exists = scope.resolve(var.name);
     if (exists != null) {
       System.out.println("Error: such variable " + exists.name + " already exists");
@@ -111,12 +111,14 @@ public class Task05ASTScopeVisitor extends Task05ParseTreeVisitor {
     String name = node.children.getFirst().getValue();
     Symbol func = new Function(name, null);
     scope.bind(func);
-    Scope iScope = new Scope(scope);
-    scope.innerScope = iScope;
-    scope = iScope;
-    scopeList.add(scope); // for printing
+    scope.innerScopes.add(new Scope(scope));
+    scope = scope.innerScopes.getLast();
     for (int i = 1; i < node.children.size(); i++) {
-      visit(node.children.get(i));
+      if (node.children.get(i).getType() == Task05ASTNode.Type.ID) {
+        scope.bind(new Variable(node.children.get(i).getValue(), null, null));
+      } else {
+        visit(node.children.get(i));
+      }
     }
     scope = scope.enclosingScope;
     return node;
@@ -150,13 +152,20 @@ public class Task05ASTScopeVisitor extends Task05ParseTreeVisitor {
   }
 
   public Task05ASTNode visitLet(Task05ASTNode node) {
-    scope.innerScope = new Scope(scope);
-    scope = scope.innerScope;
-    scopeList.add(scope); // for printing
-    for (int i = 0; i <= node.children.size() - 1; i += 2) {
+    scope.innerScopes.add(new Scope(scope));
+    scope = scope.innerScopes.getLast();
+    for (int i = 0; i < node.children.size(); i++) {
+      if (node.children.get(i).getType() == Task05ASTNode.Type.NUMBER
+          || node.children.get(i).getType() == Task05ASTNode.Type.STRING
+          || node.children.get(i).getType() == Task05ASTNode.Type.BOOLEAN
+          || node.children.get(i).getType() == Task05ASTNode.Type.LIST) {
+        continue;
+      }
       if (node.children.get(i).getType() == Task05ASTNode.Type.ID) {
         Symbol t = scope.resolve(node.children.get(i + 1).getType().name());
-        Symbol var = new Variable(node.children.get(i).getValue(), t.name);
+        Symbol var =
+            new Variable(
+                node.children.get(i).getValue(), t.name, node.children.get(i + 1).getValue());
         scope.bind(var);
       } else {
         visit(node.children.get(i));
@@ -172,9 +181,8 @@ public class Task05ASTScopeVisitor extends Task05ParseTreeVisitor {
   }
 
   public Task05ASTNode visitBlock(Task05ASTNode node) {
-    scope.innerScope = new Scope(scope);
-    scope = scope.innerScope;
-    scopeList.add(scope); // for printing
+    scope.innerScopes.add(new Scope(scope));
+    scope = scope.innerScopes.getLast();
     visitChildren(node);
     scope = scope.enclosingScope;
     return node;
