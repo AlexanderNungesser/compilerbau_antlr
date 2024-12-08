@@ -65,5 +65,7 @@ public class MainTask05 {
 
     Task05Interpreter interpreter = new Task05Interpreter(scopeVisitor.scope);
     interpreter.eval(astScope);
+
+    astScope.print();
   }
 }

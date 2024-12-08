@@ -38,6 +38,9 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
 
   public Object evalID(Task05ASTNode node) {
     Symbol symbol = scope.resolve(node.getValue());
+    // keine Ahnung was passieren soll, wenn symbol oder symbol.type null ist
+    if (symbol == null) {}
+    if (symbol.type == null){}
     if (symbol.type.equals(Task05ASTNode.Type.NUMBER.name())) {
       return Double.parseDouble(symbol.value);
     } else if (symbol.type.equals(Task05ASTNode.Type.BOOLEAN.name())) {
@@ -72,7 +75,7 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
 
       switch (child.getType()) {
         case Task05ASTNode.Type.OP:
-          evalOp(node);
+          node = evalOp(node);
           break;
 
         case Task05ASTNode.Type.ID:
@@ -83,20 +86,20 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
             case "str":
               String a = (String) eval(node.children.get(1));
               String b = (String) eval(node.children.get(2));
-              return a.concat(b);
+              return new Task05ASTNode(a.concat(b));
 
             case "head":
-              return eval(node.children.get(1).children.getFirst());
+              return new Task05ASTNode((String) eval(node.children.get(1).children.getFirst()));
 
             case "tail":
-              return eval(node.children.get(1).children.getLast());
+              return new Task05ASTNode((String) eval(node.children.get(1).children.getLast()));
 
             case "nth":
-              return eval(
+              return new Task05ASTNode((String) eval(
                   node.children
                       .get(1)
                       .children
-                      .get(Integer.parseInt(node.children.getLast().getValue())));
+                      .get(Integer.parseInt(node.children.getLast().getValue()))));
           }
           break;
       }
@@ -104,57 +107,57 @@ public class Task05Interpreter extends Task05ASTTypeCheckVisitor {
     return node;
   }
 
-  public Object evalOp(Task05ASTNode node) {
+  public Task05ASTNode evalOp(Task05ASTNode node) {
     switch (node.children.getFirst().getValue()) {
       case "+":
         if (node.children.get(1).getType() == Task05ASTNode.Type.STRING) {
           String a = (String) eval(node.children.get(1));
           String b = (String) eval(node.children.get(2));
-          return a.concat(b);
+          return new Task05ASTNode(a.concat(b));
         }
         double a = Double.parseDouble((String) eval(node.children.get(1)));
         double b = Double.parseDouble((String) eval(node.children.get(2)));
-        return a + b;
+        return new Task05ASTNode(String.valueOf(a+b));
 
       case "-":
-        double c = (Double) eval(node.children.get(1));
-        double d = (Double) eval(node.children.get(2));
-        return c - d;
+        double c = Double.parseDouble((String) eval(node.children.get(1)));
+        double d = Double.parseDouble((String) eval(node.children.get(2)));
+        return new Task05ASTNode(String.valueOf(c-d));
 
       case "*":
-        double e = (Double) eval(node.children.get(1));
-        double f = (Double) eval(node.children.get(2));
-        return e * f;
+        double e = Double.parseDouble((String) eval(node.children.get(1)));
+        double f = Double.parseDouble((String) eval(node.children.get(2)));
+        return new Task05ASTNode(String.valueOf(e*f));
 
       case "/":
-        double g = (Double) eval(node.children.get(1));
-        double h = (Double) eval(node.children.get(2));
-        return g / h;
+        double g = Double.parseDouble((String) eval(node.children.get(1)));
+        double h = Double.parseDouble((String) eval(node.children.get(2)));
+        return new Task05ASTNode(String.valueOf(g/h));
 
       case "=":
         if (node.children.get(1).getType() == Task05ASTNode.Type.NUMBER) {
-          double i = (Double) eval(node.children.get(1));
-          double j = (Double) eval(node.children.get(2));
-          return i == j;
+          double i = Double.parseDouble((String) eval(node.children.get(1)));
+          double j = Double.parseDouble((String) eval(node.children.get(2)));
+          return new Task05ASTNode(String.valueOf(i==j));
         } else if (node.children.get(1).getType() == Task05ASTNode.Type.STRING) {
           String i = (String) eval(node.children.get(1));
           String j = (String) eval(node.children.get(2));
-          return i.equals(j);
+          return new Task05ASTNode(String.valueOf(i.equals(j)));
         } else if (node.children.get(1).getType() == Task05ASTNode.Type.BOOLEAN) {
           boolean i = (Boolean) eval(node.children.get(1));
           boolean j = (Boolean) eval(node.children.get(2));
-          return i == j;
+          return new Task05ASTNode(String.valueOf(i==j));
         }
 
       case "<":
-        double i = (Double) eval(node.children.get(1));
-        double j = (Double) eval(node.children.get(2));
-        return i < j;
+        double i = Double.parseDouble((String) eval(node.children.get(1)));
+        double j = Double.parseDouble((String) eval(node.children.get(2)));
+        return new Task05ASTNode(String.valueOf(i<j));
 
       case ">":
-        double k = (Double) eval(node.children.get(1));
-        double l = (Double) eval(node.children.get(2));
-        return k > l;
+        double k = Double.parseDouble((String) eval(node.children.get(1)));
+        double l = Double.parseDouble((String) eval(node.children.get(2)));
+        return new Task05ASTNode(String.valueOf(k>l));
     }
     return node;
   }
